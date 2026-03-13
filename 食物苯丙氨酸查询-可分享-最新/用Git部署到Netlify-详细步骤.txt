@@ -1,0 +1,120 @@
+========================================
+  用 Git 部署到 Netlify — 详细步骤
+========================================
+
+这样部署后，云函数（AI 估算）才会一起上线。
+
+----------------------------------------
+第一步：准备 GitHub 仓库
+----------------------------------------
+
+1. 打开 https://github.com 并登录（没有账号就注册一个）。
+
+2. 点右上角「+」→「New repository」。
+
+3. 填写：
+   • Repository name：随便起名，例如 phe-query 或 shipu-xiaomi
+   • 选 Public
+   • 不要勾选「Add a README」（保持空仓库）
+   • 点「Create repository」
+
+4. 创建好后，记下仓库地址，形如：
+   https://github.com/你的用户名/仓库名
+
+
+----------------------------------------
+第二步：把本文件夹推送到 GitHub
+----------------------------------------
+
+方式 A：用 GitHub 网页直接上传（最简单）
+
+  1. 在新建的仓库页面，点「uploading an existing file」或「Add file」→「Upload files」。
+
+  2. 把「食物苯丙氨酸查询-可分享」文件夹里的「所有文件和文件夹」拖进去：
+     • 必须包含：index.html、netlify 文件夹（里面有 functions）、两个说明 txt 等
+     • 注意要拖 netlify 整个文件夹（里面有 functions/phe-estimate.js），不要只拖 index.html
+
+  3. 在页面底部填 Commit message，例如「首次上传」，点「Commit changes」。
+
+  这样仓库里就有完整项目了（含 netlify/functions），可以进行第三步。
+
+
+方式 B：用电脑上的 Git 命令（适合会用命令行的）
+
+  1. 打开终端（Terminal），进入本文件夹：
+     cd /Users/wangnan/Desktop/食物苯丙氨酸查询-可分享
+
+  2. 初始化并提交：
+     git init
+     git add .
+     git commit -m "首次提交"
+
+  3. 添加远程仓库（把 你的用户名 和 仓库名 换成你刚才创建的）：
+     git remote add origin https://github.com/你的用户名/仓库名.git
+
+  4. 推送到 GitHub：
+     git branch -M main
+     git push -u origin main
+
+  若提示要登录，按提示用浏览器或 Personal Access Token 完成认证。
+
+
+----------------------------------------
+第三步：在 Netlify 用 Git 建站并部署
+----------------------------------------
+
+1. 打开 https://app.netlify.com 并登录。
+
+2. 点「Add new site」→「Import an existing project」。
+
+3. 选「Deploy with GitHub」或「Connect to Git provider」→ 选 GitHub。
+   • 若第一次用，会要求授权 Netlify 访问 GitHub，按提示同意即可。
+
+4. 在仓库列表里找到你刚上传的仓库（如 phe-query 或 shipu-xiaomi），点选它。
+
+5. 配置构建设置（Build settings）：
+   • Branch to deploy：选 main（默认即可）
+   • Build command：留空（不填）
+   • Publish directory：填一个英文点「.」表示根目录，或留空
+   • 然后点「Deploy site」或「Deploy shipu-xiaomi」等
+
+6. 等部署完成（状态变成 Published）。此时会得到一个新地址，例如：
+   https://随机名.netlify.app
+   你可以在 Site settings 里改站点名称，改成 shipu-xiaomi 就会变成 https://shipu-xiaomi.netlify.app
+
+
+----------------------------------------
+第四步：把环境变量加到新站点
+----------------------------------------
+
+用 Git 部署会生成一个「新站点」，和之前拖拽上传的站点是分开的。
+
+1. 在 Netlify 里点进这个新站点（刚用 Git 部署的那个）。
+
+2. 左侧点「Project configuration」→「Environment variables」。
+
+3. 点「Add a variable」或「Add environment variable」，添加：
+   • Key：LLM_PROVIDER    Value：deepseek
+   • Key：DEEPSEEK_API_KEY   Value：你的 DeepSeek API Key
+
+4. 保存后，到「Deploys」里点「Trigger deploy」→「Deploy site」，再部署一次让变量生效。
+
+
+----------------------------------------
+第五步：用新链接试 AI 估算
+----------------------------------------
+
+打开新站点的地址（如 https://shipu-xiaomi.netlify.app），输入一个表里没有的食物，点「查询」→「用 AI 估算」，能出结果就说明成功了。
+
+旧站点（之前拖拽上传的那个）可以不用了，或在 Netlify 里删掉避免混淆。
+
+
+========================================
+  小结
+========================================
+
+• 用 GitHub 网页上传时，一定要把 netlify 文件夹（含 functions）一起传上去。
+• Netlify 这边是「新站点 + Git 连接」，不是把旧站点改成 Git。
+• 环境变量要在「新站点」里再配一次，然后 Trigger deploy 一次。
+
+========================================

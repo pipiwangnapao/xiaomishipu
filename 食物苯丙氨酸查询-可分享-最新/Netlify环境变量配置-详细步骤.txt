@@ -1,0 +1,120 @@
+========================================
+  Netlify 环境变量配置 — 详细步骤（一步步跟着做）
+========================================
+
+【路径速查】环境变量在哪里？
+  打开 https://app.netlify.com → 点击你的「站点名称」
+  → 顶部点「Site configuration」（或「Site settings」）
+  → 左侧菜单点「Environment variables」
+  若没有左侧菜单，就在当前页面向下滚动，找到「Environment variables」区域，点「Edit」或「Manage」。
+
+
+一、先确认你的站点已经在 Netlify 上
+--------------------------------------
+• 如果你还没部署：先把「食物苯丙氨酸查询-可分享」这个文件夹
+  用「从 Git 导入」或「Netlify CLI」部署上去（不能只拖拽上传文件夹，
+  否则云函数不会部署，AI 估算用不了）。
+• 如果你已经有一个 Netlify 站点（例如 xxx.netlify.app），就继续下面步骤。
+
+
+二、打开 Netlify 后台并进入「环境变量」页面
+--------------------------------------
+
+第 1 步：打开网站
+  • 用浏览器打开： https://app.netlify.com
+  • 用你的账号登录（邮箱或 GitHub 登录都可以）。
+
+第 2 步：找到你的站点
+  • 登录后会看到「Sites」页面，上面是你所有站点。
+  • 找到「食物苯丙氨酸」相关的那个站点（看名字或域名），
+  • 用鼠标「点击这个站点的名字」，进入该站点的详情页。
+
+第 3 步：打开「站点设置」
+  • 进入站点后，在顶部有一排标签：Overview、Deploys、Integrations、Domain management、Site configuration 等。
+  • 点击「Site configuration」（站点配置）。
+  • 若没有看到，有时在右上角或左侧有「Site settings」或「Options」，点进去也能到设置。
+
+第 4 步：找到「Environment variables」
+  • 在左侧会有一列菜单：Build & deploy、Environment variables、Functions、等等。
+  • 点击「Environment variables」（环境变量）。
+  • 若左侧没有，就在「Site configuration」页面里向下滚动，找到「Environment variables」或「Build environment variables」这一块，点「Edit variables」或「Manage variables」或「Add a variable」。
+
+
+三、添加环境变量（以 DeepSeek 为例）
+--------------------------------------
+
+页面上会有一个按钮，一般是：
+  • 「Add a variable」或「Add environment variable」或「New variable」
+  • 或者「Edit settings」→ 再点「Add a variable」
+
+添加第一个变量（选择用哪个模型）：
+  • Key（键 / 变量名）：LLM_PROVIDER
+  • Value（值）：deepseek
+  • 然后点「Create」或「Save」或「Add」。
+
+添加第二个变量（DeepSeek 的 API Key）：
+  • 再点一次「Add a variable」。
+  • Key：DEEPSEEK_API_KEY
+  • Value：填你在 https://platform.deepseek.com 里创建的 API Key（一长串字符）。
+  • 若有一项是「Scopes」或「Environment」，选「All」或「Production」即可。
+  • 点「Create」或「Save」。
+
+如何获取 DeepSeek API Key：
+  • 打开 https://platform.deepseek.com
+  • 注册/登录 → 左侧或个人中心里找「API Keys」或「API 密钥」
+  • 点「Create API Key」→ 复制生成的 Key，粘贴到上面的 Value 里。
+
+
+四、保存后一定要「重新部署」
+--------------------------------------
+  • 环境变量改完后，Netlify 不会自动重新部署。
+  • 回到站点首页，点顶部的「Deploys」。
+  • 在右侧找到「Trigger deploy」→ 点「Deploy site」或「Clear cache and deploy site」。
+  • 等部署状态变成「Published」，再打开你的链接试「用 AI 估算」。
+
+
+五、若页面上找不到「Environment variables」
+--------------------------------------
+不同版本 Netlify 界面可能略有不同，可以这样找：
+
+方式 A：从站点名进入
+  站点列表 → 点你的站点名 → 上方或左侧找「Site configuration」或「Settings」
+  → 在设置里找「Environment variables」或「Build & deploy」下的「Environment」.
+  
+方式 B：从顶栏进入
+  点你的站点名 → 顶部有「Site settings」或齿轮图标 → 左侧菜单里的
+  「Environment variables」.
+  
+方式 C：搜索
+  在 Netlify 页面里用浏览器搜索（Ctrl+F 或 Cmd+F）输入「Environment」或「variable」，
+  看高亮出现在哪一块，点进去即可。
+
+
+六、变量汇总（复制用）
+--------------------------------------
+若用 DeepSeek（推荐）：
+  LLM_PROVIDER = deepseek
+  DEEPSEEK_API_KEY = sk-xxxxxxxx（你的 Key）
+
+若用 Kimi：
+  LLM_PROVIDER = kimi
+  MOONSHOT_API_KEY = 你的 Kimi API Key
+
+若用豆包：
+  LLM_PROVIDER = doubao
+  DOUBAO_API_KEY = 你的火山方舟 Key
+  DOUBAO_ENDPOINT_ID = ep-2024xxxxxx（推理接入点 ID）
+
+
+七、常见问题
+--------------------------------------
+Q：添加变量时没有「Key」「Value」输入框？
+A：有的界面是表格形式：一列写变量名，一列写值。按上面名字和值填即可。
+
+Q：保存后点「用 AI 估算」还是报错？
+A：先到 Deploys 里做一次「Trigger deploy」；再确认 Key 没多复制空格、没选错模型（LLM_PROVIDER 和对应的 Key 要匹配）。
+
+Q：我只有拖拽上传的静态站，没有连 Git，能加环境变量吗？
+A：可以加，但拖拽上传的站点不会部署云函数，所以 AI 估算功能仍然用不了。必须用「从 Git 导入」或 Netlify CLI 部署带 netlify/functions 的仓库，环境变量才会在云函数里生效。
+
+========================================

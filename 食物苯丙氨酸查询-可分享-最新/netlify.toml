@@ -1,0 +1,4 @@
+# 明确告诉 Netlify：发布根目录为当前目录，云函数在 netlify/functions
+[build]
+  publish = "."
+  functions = "netlify/functions"
