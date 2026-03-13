@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>食物苯丙氨酸查询</title>
+  <style>
+    :root {
+      --bg: #f0f7f4;
+      --header-from: #0d9488;
+      --header-to: #0f766e;
+      --accent: #0d9488;
+      --accent-soft: rgba(13, 148, 136, 0.12);
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.06);
+      --shadow-focus: 0 0 0 4px rgba(13, 148, 136, 0.2);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      color: var(--text);
+    }
+    .header {
+      background: linear-gradient(135deg, var(--header-from) 0%, var(--header-to) 100%);
+      padding: 28px 20px 32px;
+      padding-top: calc(28px + env(safe-area-inset-top));
+      padding-left: calc(20px + env(safe-area-inset-left));
+      padding-right: calc(20px + env(safe-area-inset-right));
+      border-radius: 0 0 28px 28px;
+      box-shadow: 0 8px 32px rgba(13, 148, 136, 0.25);
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 6px;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+    .header-title .icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .header-sub {
+      margin: 0;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.88);
+      line-height: 1.45;
+    }
+    .field-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .field-card:focus-within {
+      box-shadow: var(--shadow), var(--shadow-focus);
+    }
+    .field-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .field-card input.input-full {
+      width: 100%;
+      min-height: 48px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      color: var(--text);
+      background: #fff;
+    }
+    .field-card input.input-full::placeholder { color: var(--text-muted); }
+    .field-card input.input-full:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .gram-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .gram-row input {
+      width: 120px;
+      min-height: 48px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      color: var(--text);
+      background: #fff;
+      text-align: right;
+    }
+    .gram-row input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .gram-row .unit-label {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+    .result .phe-per-100 {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+    .result .phe-for-gram {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+    .main {
+      padding: 24px 20px 32px;
+      padding-left: calc(20px + env(safe-area-inset-left));
+      padding-right: calc(20px + env(safe-area-inset-right));
+      padding-bottom: calc(32px + env(safe-area-inset-bottom));
+      margin-top: -12px;
+    }
+    .search-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      margin-bottom: 24px;
+    }
+    .search-actions button {
+      flex: 1;
+    }
+    button {
+      min-height: 48px;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--header-from), var(--header-to));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+      box-shadow: 0 2px 12px rgba(13, 148, 136, 0.35);
+    }
+    button:active { opacity: 0.92; transform: scale(0.98); }
+    .result {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px 20px 22px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--accent);
+    }
+    .result .name {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+      font-size: 1.08rem;
+      line-height: 1.4;
+    }
+    .result .phe {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .result .unit {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .no-data {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .ai-estimate-btn {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, var(--header-from), var(--header-to));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .ai-estimate-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    .result .ai-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      font-style: italic;
+    }
+    .list {
+      margin-top: 16px;
+      max-height: min(60vh, 400px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .list-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    .list-item {
+      min-height: 52px;
+      padding: 14px 18px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .list-item-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+      flex: 1;
+    }
+    .list-item-name { font-weight: 500; }
+    .list-item-gram {
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .list-item .phe {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1 class="header-title"><span class="icon">🥗</span> 食物苯丙氨酸查询</h1>
+    <p class="header-sub">输入食物名称和克数（选填），可查对应含量与每 100g 含量</p>
+  </header>
+  <main class="main">
+    <div class="field-card">
+      <label class="field-label" for="q">食物名称</label>
+      <input type="text" id="q" class="input-full" placeholder="如：土豆、番茄、牛奶" autocomplete="off" inputmode="text" enterkeyhint="next" autofocus>
+    </div>
+    <div class="field-card">
+      <label class="field-label" for="gram">克数（选填）</label>
+      <div class="gram-row">
+        <input type="number" id="gram" placeholder="0" min="0" step="1" inputmode="numeric" enterkeyhint="done" autocomplete="off">
+        <span class="unit-label">克</span>
+      </div>
+    </div>
+    <div class="search-actions">
+      <button type="button" id="btn">查询</button>
+    </div>
+    <div id="out"></div>
+  </main>
+  <script>
+    window.FOOD_PHE_DATA = [{"name": "小麦粉（标准粉）", "phe": 528.0}, {"name": "小麦粉（富强粉，特一粉）", "phe": 528.0}, {"name": "小麦粉（特二粉）", "phe": 478.0}, {"name": "麸皮", "phe": 671.0}, {"name": "挂面（X）", "phe": 479.0}, {"name": "挂面（标准粉）", "phe": 463.0}, {"name": "挂面（富强粉）", "phe": 464.0}, {"name": "挂面（精制龙须面）", "phe": 510.0}, {"name": "面条（X）", "phe": 214.0}, {"name": "面条（标准粉，切面）", "phe": 274.0}, {"name": "面条（特粉，切面）", "phe": 154.0}, {"name": "通心面［通心粉］", "phe": 553.0}, {"name": "空锅饼", "phe": 456.0}, {"name": "烙饼（标准粉）", "phe": 253.0}, {"name": "油条", "phe": 358.0}, {"name": "水面筋", "phe": 1119.0}, {"name": "油面筋", "phe": 1216.0}, {"name": "粳米（标三）", "phe": 383.0}, {"name": "粳米（特等）", "phe": 335.0}, {"name": "籼米（标一）", "phe": 349.0}, {"name": "籼米（标准）［机米］", "phe": 397.0}, {"name": "早籼", "phe": 421.0}, {"name": "晚籼（标一）", "phe": 422.0}, {"name": "籼稻谷（红）", "phe": 330.0}, {"name": "黑米", "phe": 483.0}, {"name": "紫红糯米［血糯米］", "phe": 458.0}, {"name": "粳糯米", "phe": 441.0}, {"name": "籼糯米", "phe": 441.0}, {"name": "籼米粉（干，细）", "phe": 361.0}, {"name": "玉米（白，干）", "phe": 421.0}, {"name": "玉米（黄，干）", "phe": 417.0}, {"name": "玉米面（白）", "phe": 379.0}, {"name": "玉米面（黄）", "phe": 388.0}, {"name": "玉米糁（黄）", "phe": 378.0}, {"name": "肚里黄", "phe": 469.0}, {"name": "青稞", "phe": 550.0}, {"name": "小米", "phe": 494.0}, {"name": "黄米", "phe": 552.0}, {"name": "高粱米", "phe": 655.0}, {"name": "糜子（带皮）", "phe": 708.0}, {"name": "荞麦", "phe": 596.0}, {"name": "荞麦（带皮）", "phe": 609.0}, {"name": "薏米［薏仁米，苡米］", "phe": 645.0}, {"name": "马铃薯［土豆，洋芋］", "phe": 67.0}, {"name": "马铃薯粉", "phe": 197.0}, {"name": "甘薯（白心）［红皮山芋］", "phe": 71.0}, {"name": "甘薯（红心）［山芋，红薯］", "phe": 56.0}, {"name": "甘薯片［白薯干］", "phe": 197.0}, {"name": "桂花藕粉", "phe": null}, {"name": "黄豆［大豆］", "phe": 1844.0}, {"name": "黑豆［黑大豆］", "phe": 1690.0}, {"name": "黄豆粉", "phe": 1789.0}, {"name": "豆浆粉", "phe": 1039.0}, {"name": "豆粕", "phe": 1945.0}, {"name": "豆粕（膨化）［大豆蛋白］", "phe": 1903.0}, {"name": "豆腐（北）", "phe": 507.0}, {"name": "豆腐（南）［南豆腐］", "phe": 300.0}, {"name": "豆腐（内酯）", "phe": 265.0}, {"name": "豆浆", "phe": 111.0}, {"name": "豆奶［豆乳］", "phe": 92.0}, {"name": "豆腐丝", "phe": 824.0}, {"name": "豆腐丝（油）", "phe": 1137.0}, {"name": "豆腐皮", "phe": 2328.0}, {"name": "油豆腐", "phe": 861.0}, {"name": "腐竹", "phe": 2318.0}, {"name": "千张", "phe": 1241.0}, {"name": "豆腐干（X）", "phe": 756.0}, {"name": "豆腐干（香干）", "phe": 863.0}, {"name": "豆腐干（小香干）", "phe": 1002.0}, {"name": "豆腐干（熏干）", "phe": 691.0}, {"name": "素鸡", "phe": 926.0}, {"name": "素什锦", "phe": 856.0}, {"name": "炸素虾", "phe": 1193.0}, {"name": "烤麸", "phe": 762.0}, {"name": "绿豆", "phe": 1412.0}, {"name": "绿豆面", "phe": 1652.0}, {"name": "赤小豆［小豆，红小豆］", "phe": 1084.0}, {"name": "花豆（红）", "phe": 948.0}, {"name": "花豆（紫）", "phe": 931.0}, {"name": "芸豆（白）", "phe": 1342.0}, {"name": "芸豆（红）", "phe": 1362.0}, {"name": "芸豆（虎皮）", "phe": 1519.0}, {"name": "芸豆（杂，带皮）", "phe": 1439.0}, {"name": "蚕豆", "phe": 803.0}, {"name": "蚕豆（带皮）", "phe": 1135.0}, {"name": "蚕豆（去皮）", "phe": 905.0}, {"name": "马牙大豆", "phe": 1171.0}, {"name": "脑豆", "phe": 1505.0}, {"name": "扁豆", "phe": 1376.0}, {"name": "扁豆（白）", "phe": 1052.0}, {"name": "豇豆", "phe": 1399.0}, {"name": "豌豆", "phe": 938.0}, {"name": "白萝卜［莱菔］", "phe": 18.0}, {"name": "变萝卜［红皮萝卜］", "phe": 26.0}, {"name": "胡萝卜（红）［金笋，丁香萝卜］", "phe": 29.0}, {"name": "扁豆［月亮菜］", "phe": 79.0}, {"name": "荷兰豆", "phe": 82.0}, {"name": "毛豆［青豆，菜用大豆］", "phe": 593.0}, {"name": "豌豆（带荚）［回回豆］", "phe": 279.0}, {"name": "油豆角［多花菜豆］", "phe": 103.0}, {"name": "豇豆", "phe": 106.0}, {"name": "发芽豆", "phe": 417.0}, {"name": "黄豆芽", "phe": 191.0}, {"name": "绿豆芽", "phe": 110.0}, {"name": "豌豆苗", "phe": 152.0}, {"name": "茄子（X）", "phe": 46.0}, {"name": "茄子（绿皮）", "phe": 38.0}, {"name": "茄子（紫皮，长）", "phe": 52.0}, {"name": "番茄［西红柿］", "phe": 20.0}, {"name": "辣椒（青，尖）", "phe": 50.0}, {"name": "甜椒［灯笼椒，柿子椒］", "phe": 31.0}, {"name": "甜椒（脱水）", "phe": 398.0}, {"name": "葫子", "phe": 46.0}, {"name": "菜瓜［生瓜，白瓜］", "phe": 15.0}, {"name": "冬瓜", "phe": 14.0}, {"name": "葫芦［长瓜，蒲瓜］", "phe": 14.0}, {"name": "黄瓜［胡瓜］", "phe": 19.0}, {"name": "苦瓜［凉瓜，癞瓜］", "phe": 60.0}, {"name": "南瓜［倭瓜，番瓜］", "phe": 17.0}, {"name": "丝瓜", "phe": 26.0}, {"name": "大蒜［蒜头］", "phe": 125.0}, {"name": "大蒜（紫皮）", "phe": 145.0}, {"name": "青蒜", "phe": 89.0}, {"name": "蒜苗", "phe": 62.0}, {"name": "大葱", "phe": 73.0}, {"name": "大葱（红皮）", "phe": 100.0}, {"name": "小葱", "phe": 61.0}, {"name": "洋葱［葱头］", "phe": 46.0}, {"name": "洋葱（白皮，脱水）", "phe": 273.0}, {"name": "韭菜", "phe": 94.0}, {"name": "大白菜（青白口）", "phe": 39.0}, {"name": "大白菜（小白口）", "phe": 49.0}, {"name": "酸白菜［酸菜］", "phe": 37.0}, {"name": "小白菜", "phe": 55.0}, {"name": "油菜", "phe": 58.0}, {"name": "油菜薹［菜薹］", "phe": 76.0}, {"name": "甘蓝［圆白菜，卷心菜］", "phe": 35.0}, {"name": "菜花［花椰菜］", "phe": 73.0}, {"name": "芥菜［雪里红，雪菜］", "phe": 95.0}, {"name": "芥菜（大叶）［盖菜］", "phe": 46.0}, {"name": "菠菜［赤根菜］", "phe": 108.0}, {"name": "胡萝卜缨（红）", "phe": 169.0}, {"name": "萝卜缨（白）", "phe": 192.0}, {"name": "芹菜（白茎）［旱芹，药芹］", "phe": 30.0}, {"name": "生菜（叶用莴苣）", "phe": 32.0}, {"name": "甜菜叶", "phe": 48.0}, {"name": "香菜［芫荽］", "phe": 66.0}, {"name": "苋菜（绿）", "phe": 182.0}, {"name": "茼蒿［蓬蒿菜，艾菜］", "phe": 83.0}, {"name": "茴香［小茴香］", "phe": 121.0}, {"name": "荠菜［蓟菜，菱角菜］", "phe": 112.0}, {"name": "莴笋［莴苣］", "phe": 19.0}, {"name": "蕹菜［空心菜，藤藤菜］", "phe": 61.0}, {"name": "竹笋", "phe": 79.0}, {"name": "鞭笋［马鞭笋］", "phe": 79.0}, {"name": "春笋", "phe": 73.0}, {"name": "黑笋（干）", "phe": 513.0}, {"name": "毛笋［毛竹笋］", "phe": 67.0}, {"name": "百合（干）", "phe": 267.0}, {"name": "百合（脱水）", "phe": 302.0}, {"name": "菊苣", "phe": null}, {"name": "芦笋［石刁柏，龙须菜］", "phe": 24.0}, {"name": "豆瓣菜［西洋菜，水田芥］", "phe": 122.0}, {"name": "藕［莲藕］", "phe": 33.0}, {"name": "水芹菜", "phe": 33.0}, {"name": "茭白［茭笋，茭粑］", "phe": 48.0}, {"name": "荸荠［马蹄，地栗］", "phe": 26.0}, {"name": "莼菜（瓶装）［花案菜］", "phe": 45.0}, {"name": "山药［薯蓣，大薯］", "phe": 54.0}, {"name": "芋头［芋艿，毛芋］", "phe": 108.0}, {"name": "姜［黄姜］", "phe": 60.0}, {"name": "黄麻叶", "phe": 212.0}, {"name": "马兰头［马兰，鸡儿肠，路边菊］", "phe": 81.0}, {"name": "香椿［香椿芽］", "phe": 63.0}, {"name": "苜蓿［草头，金花菜］", "phe": 226.0}, {"name": "猴头菇（罐装）", "phe": null}, {"name": "金针菇［智力菇］", "phe": 58.0}, {"name": "金针菇（罐装）", "phe": 24.0}, {"name": "蘑菇（鲜蘑）", "phe": 66.0}, {"name": "蘑菇（干）", "phe": 1033.0}, {"name": "木耳（干）［黑木耳，云耳］", "phe": 435.0}, {"name": "木耳（水发）［黑木耳，云耳］", "phe": 54.0}, {"name": "平菇［皮侧耳、青票）", "phe": 67.0}, {"name": "香菇（香草，冬菇］", "phe": 77.0}, {"name": "香菇（干）［香草，冬菇］", "phe": 608.0}, {"name": "银耳（干）［白木耳］", "phe": 436.0}, {"name": "发菜（干）［仙菜］", "phe": 876.0}, {"name": "海带（浸）［江白菜.昆布］", "phe": 44.0}, {"name": "苔菜（干）［苔条，条浒苔］", "phe": 915.0}, {"name": "紫菜（干）", "phe": 1061.0}, {"name": "苹果（X）", "phe": 11.0}, {"name": "国光苹果", "phe": 17.0}, {"name": "旱苹果", "phe": 22.0}, {"name": "红玉苹果", "phe": 11.0}, {"name": "黄香蕉苹果", "phe": 17.0}, {"name": "金元帅苹果", "phe": 11.0}, {"name": "倭锦苹果", "phe": 11.0}, {"name": "梨（X）", "phe": 14.0}, {"name": "红肖梨", "phe": 7.0}, {"name": "锦丰梨", "phe": 7.0}, {"name": "库尔勒梨", "phe": 4.0}, {"name": "莱阳梨", "phe": 11.0}, {"name": "明月梨", "phe": 11.0}, {"name": "木梨", "phe": 11.0}, {"name": "苹果梨", "phe": 7.0}, {"name": "香梨", "phe": 11.0}, {"name": "鸭梨", "phe": 7.0}, {"name": "鳄梨", "phe": 68.0}, {"name": "红果［山里红，大山楂］", "phe": 17.0}, {"name": "红果（干）", "phe": 175.0}, {"name": "海棠果［楸子］", "phe": 7.0}, {"name": "酸刺", "phe": 132.0}, {"name": "桃（X）", "phe": 25.0}, {"name": "蜜桃", "phe": 15.0}, {"name": "蒲桃", "phe": 26.0}, {"name": "桃（糖水罐头）", "phe": 8.0}, {"name": "李子", "phe": 12.0}, {"name": "李子杏", "phe": 24.0}, {"name": "枣（干）", "phe": 92.0}, {"name": "酒枣", "phe": 70.0}, {"name": "蜜枣", "phe": 37.0}, {"name": "樱桃", "phe": 31.0}, {"name": "樱桃（野，白刺）", "phe": 337.0}, {"name": "葡萄（X）", "phe": 14.0}, {"name": "巨峰葡萄", "phe": 11.0}, {"name": "马奶子葡萄", "phe": 14.0}, {"name": "紫葡萄", "phe": 20.0}, {"name": "葡萄干", "phe": null}, {"name": "柿", "phe": 14.0}, {"name": "桑葚（干）", "phe": 797.0}, {"name": "沙棘", "phe": 50.0}, {"name": "中华猕猴桃［毛叶猕猴桃］", "phe": 18.0}, {"name": "草莓［洋莓，凤阳草莓］", "phe": 22.0}, {"name": "橙", "phe": 17.0}, {"name": "柑橘（X）", "phe": 15.0}, {"name": "金橘［金枣］", "phe": 21.0}, {"name": "蜜橘", "phe": 17.0}, {"name": "三湖红橘", "phe": 17.0}, {"name": "早橘", "phe": 25.0}, {"name": "橘饼", "phe": 10.0}, {"name": "柚［文旦］", "phe": 17.0}, {"name": "芭蕉［甘蕉，板蕉，牙蕉］", "phe": 58.0}, {"name": "菠萝［凤梨，地菠萝］", "phe": null}, {"name": "桂圆", "phe": 22.0}, {"name": "桂圆（干）", "phe": 111.0}, {"name": "桂圆肉", "phe": 196.0}, {"name": "荔枝", "phe": 18.0}, {"name": "芒果［抹猛果，望果］", "phe": 20.0}, {"name": "木瓜［番木瓜］", "phe": 19.0}, {"name": "人参果", "phe": 21.0}, {"name": "香蕉［甘蕉］", "phe": 46.0}, {"name": "杨梅［树梅，山杨梅］", "phe": 40.0}, {"name": "椰子", "phe": 180.0}, {"name": "枇杷", "phe": 20.0}, {"name": "橄榄（白榄）", "phe": 16.0}, {"name": "余甘子［油甘子］", "phe": 8.0}, {"name": "白金瓜", "phe": 7.0}, {"name": "白兰瓜", "phe": 43.0}, {"name": "黄河蜜瓜", "phe": 15.0}, {"name": "金塔寺瓜", "phe": 42.0}, {"name": "麻醉瓜", "phe": 43.0}, {"name": "甜瓜［香瓜］", "phe": 11.0}, {"name": "西瓜（X）", "phe": 14.0}, {"name": "白果（干）［银杏］", "phe": 425.0}, {"name": "核桃（鲜）", "phe": 543.0}, {"name": "核桃（干）［胡桃］", "phe": 735.0}, {"name": "毛核桃", "phe": 701.0}, {"name": "山核桃（熟）［小核桃］", "phe": 391.0}, {"name": "栗子（鲜）［板栗］", "phe": 225.0}, {"name": "松子（生）", "phe": 482.0}, {"name": "松子仁", "phe": 475.0}, {"name": "杏仁", "phe": 1192.0}, {"name": "榛子（干）", "phe": 927.0}, {"name": "花生（鲜）［落花生 长生里］", "phe": 497.0}, {"name": "花生（炒）", "phe": 1058.0}, {"name": "花生仁（生）", "phe": 1209.0}, {"name": "花生仁（炒）", "phe": 1165.0}, {"name": "葵花子（炒）", "phe": 942.0}, {"name": "葵花子仁", "phe": 750.0}, {"name": "莲子（干）", "phe": 731.0}, {"name": "南瓜子仁", "phe": 1304.0}, {"name": "西瓜子（炒）", "phe": 1372.0}, {"name": "西瓜子仁", "phe": 1053.0}, {"name": "芝麻（黑）", "phe": 830.0}, {"name": "猪肉（肥瘦）（X）", "phe": 464.0}, {"name": "猪肉（后臀尖）", "phe": 582.0}, {"name": "猪肉（后肘）", "phe": 659.0}, {"name": "猪肉（里脊）", "phe": 748.0}, {"name": "猪肉（奶脯）［软五花，猪夹心］", "phe": 193.0}, {"name": "猪肉（奶面）［硬五花］", "phe": 426.0}, {"name": "猪肉（前肘）", "phe": 541.0}, {"name": "猪肉（瘦）", "phe": 889.0}, {"name": "猪肉（腿）", "phe": 764.0}, {"name": "猪肉（猪脖）", "phe": 231.0}, {"name": "猪大肠", "phe": 251.0}, {"name": "猪大排", "phe": 574.0}, {"name": "猪蹄筋", "phe": 1054.0}, {"name": "猪肘棒", "phe": 448.0}, {"name": "猪肚", "phe": 519.0}, {"name": "猪肺", "phe": 503.0}, {"name": "猪肝", "phe": 919.0}, {"name": "猪脑", "phe": 512.0}, {"name": "猪舌［猪口条］", "phe": 553.0}, {"name": "猪肾［猪腰子］", "phe": 677.0}, {"name": "猪心", "phe": 673.0}, {"name": "叉烧肉", "phe": 987.0}, {"name": "酱汁肉", "phe": 704.0}, {"name": "腊肉（培根）", "phe": 937.0}, {"name": "咸肉", "phe": 704.0}, {"name": "猪肝（卤煮）", "phe": 1417.0}, {"name": "猪蹄（熟）", "phe": 647.0}, {"name": "猪肉松（X）", "phe": 1232.0}, {"name": "福建式肉松", "phe": 1821.0}, {"name": "老年保健肉松", "phe": 1334.0}, {"name": "太仓肉松", "phe": 2377.0}, {"name": "茶肠", "phe": 400.0}, {"name": "大腊肠", "phe": 564.0}, {"name": "大肉肠", "phe": 540.0}, {"name": "猪蹄筋", "phe": 1054.0}, {"name": "猪肘棒", "phe": 448.0}, {"name": "猪肚", "phe": 519.0}, {"name": "猪肺", "phe": 503.0}, {"name": "猪肝", "phe": 919.0}, {"name": "猪脑", "phe": 512.0}, {"name": "猪舌［猪口条］", "phe": 553.0}, {"name": "猪肾［猪腰子］", "phe": 677.0}, {"name": "猪心", "phe": 673.0}, {"name": "叉烧肉", "phe": 987.0}, {"name": "酱汁肉", "phe": 704.0}, {"name": "腊肉（培根）", "phe": 937.0}, {"name": "咸肉", "phe": 704.0}, {"name": "猪肝（卤煮）", "phe": 1417.0}, {"name": "猪蹄（熟）", "phe": 647.0}, {"name": "猪肉松（X）", "phe": 1232.0}, {"name": "福建式肉松", "phe": 1821.0}, {"name": "老年保健肉松", "phe": 1334.0}, {"name": "太仓肉松", "phe": 2377.0}, {"name": "茶肠", "phe": 400.0}, {"name": "大腊肠", "phe": 564.0}, {"name": "大肉肠", "phe": 540.0}, {"name": "儿童肠", "phe": 538.0}, {"name": "风干肠", "phe": 492.0}, {"name": "广东香肠", "phe": 877.0}, {"name": "红果肠", "phe": 421.0}, {"name": "火腿肠", "phe": 588.0}, {"name": "松江肠", "phe": 517.0}, {"name": "蒜肠", "phe": 191.0}, {"name": "香肠", "phe": 1090.0}, {"name": "香肠（罐头）", "phe": 251.0}, {"name": "小泥肠", "phe": 476.0}, {"name": "方腿", "phe": 681.0}, {"name": "金华火腿", "phe": 689.0}, {"name": "圆腿", "phe": 773.0}, {"name": "牛肉（肥瘦）（X）", "phe": 817.0}, {"name": "牛肉（腑肋）", "phe": 526.0}, {"name": "牛肉（后腿）", "phe": 971.0}, {"name": "牛肉（里脊）", "phe": 1216.0}, {"name": "牛肉（前腿）", "phe": 938.0}, {"name": "牛肉（前腱）", "phe": 664.0}, {"name": "牛蹄筋", "phe": 704.0}, {"name": "牛蹄筋（泡发）", "phe": 157.0}, {"name": "牛大肠", "phe": 425.0}, {"name": "牛肚", "phe": 561.0}, {"name": "牛肺", "phe": 848.0}, {"name": "牛肝", "phe": 1083.0}, {"name": "牛脑", "phe": 579.0}, {"name": "牛舌", "phe": 768.0}, {"name": "牛肾", "phe": 804.0}, {"name": "牛心", "phe": 761.0}, {"name": "酱牛肉", "phe": 1306.0}, {"name": "煨牛肉（罐头）", "phe": 514.0}, {"name": "咖哩牛肉干", "phe": 2312.0}, {"name": "牛肉松", "phe": 336.0}, {"name": "羊肉（肥瘦）（X）", "phe": 739.0}, {"name": "羊肉（后腿）", "phe": 823.0}, {"name": "羊肉（颈）", "phe": 859.0}, {"name": "羊肉（里脊）", "phe": 429.0}, {"name": "羊肉（前腿）", "phe": null}, {"name": "羊肉（青羊）", "phe": 840.0}, {"name": "羊肉（瘦）", "phe": 797.0}, {"name": "羊肉（胸脯）", "phe": 589.0}, {"name": "羊蹄筋（泡发）", "phe": 184.0}, {"name": "羊肚", "phe": 381.0}, {"name": "羊肺", "phe": 733.0}, {"name": "羊肝", "phe": 940.0}, {"name": "羊舌", "phe": 782.0}, {"name": "羊肾", "phe": 702.0}, {"name": "羊心", "phe": 698.0}, {"name": "腊羊肉", "phe": 856.0}, {"name": "羊肉（熟）", "phe": 898.0}, {"name": "羊肉串（电烤）", "phe": null}, {"name": "羊肉串（烤）", "phe": 634.0}, {"name": "羊肉串（炸）", "phe": 806.0}, {"name": "羊肉手抓", "phe": 917.0}, {"name": "山羊肉（酱）", "phe": 929.0}, {"name": "驴肉（瘦）", "phe": 977.0}, {"name": "驴肉（酱）", "phe": 1205.0}, {"name": "驴肉（卤）", "phe": 1068.0}, {"name": "驴肉（煮）", "phe": 1053.0}, {"name": "马肉", "phe": 807.0}, {"name": "马心", "phe": 730.0}, {"name": "马肉（卤）", "phe": 1460.0}, {"name": "狗肉", "phe": 645.0}, {"name": "骆驼蹄", "phe": 690.0}, {"name": "骆驼掌", "phe": 3311.0}, {"name": "兔肉", "phe": 885.0}, {"name": "鸡（X）", "phe": 728.0}, {"name": "鸡（土鸡，家养）", "phe": 626.0}, {"name": "华青鸡", "phe": 679.0}, {"name": "沙鸡", "phe": 1171.0}, {"name": "乌骨鸡", "phe": 706.0}, {"name": "鸡爪", "phe": 573.0}, {"name": "鸡血", "phe": 584.0}, {"name": "鸡肫［鸡胗］", "phe": 724.0}, {"name": "扒鸡", "phe": 1205.0}, {"name": "烤鸡", "phe": 909.0}, {"name": "肯德鸡［炸鸡］", "phe": 922.0}, {"name": "鸡肉松", "phe": 334.0}, {"name": "鸭（X）", "phe": 623.0}, {"name": "鸭胸脯肉", "phe": 603.0}, {"name": "鸭皮", "phe": 267.0}, {"name": "鸭翅", "phe": 473.0}, {"name": "鸭掌", "phe": 1236.0}, {"name": "鸭肠", "phe": 569.0}, {"name": "鸭肝", "phe": 640.0}, {"name": "鸭舌［鸭条］", "phe": 664.0}, {"name": "鸭心", "phe": 544.0}, {"name": "鸭胰", "phe": 915.0}, {"name": "鸭肫", "phe": 607.0}, {"name": "北京烤鸭", "phe": 658.0}, {"name": "北京填鸭", "phe": 374.0}, {"name": "酱鸭", "phe": 300.0}, {"name": "盐水鸭（熟）", "phe": null}, {"name": "鸽", "phe": 714.0}, {"name": "鹌鹑", "phe": 743.0}, {"name": "牛乳（X）", "phe": 117.0}, {"name": "牛乳（美国牛）", "phe": 113.0}, {"name": "牛乳（德国牛）", "phe": 121.0}, {"name": "人乳", "phe": 36.0}, {"name": "全脂加糖奶粉", "phe": 781.0}, {"name": "全脂牛奶粉", "phe": 987.0}, {"name": "全脂羊乳粉", "phe": 910.0}, {"name": "酸奶（X）", "phe": 96.0}, {"name": "酸奶（高蛋白）", "phe": 123.0}, {"name": "酸奶（脱脂）", "phe": 127.0}, {"name": "酸奶（中脂）", "phe": 104.0}, {"name": "酸奶（果料）", "phe": 119.0}, {"name": "酸奶（橘味，脱脂）", "phe": 123.0}, {"name": "奶疙瘩［奶酪干，干酸奶］", "phe": 2823.0}, {"name": "曲拉", "phe": 1932.0}, {"name": "炼乳（甜，罐头）", "phe": 349.0}, {"name": "鸡蛋（白皮）", "phe": 612.0}, {"name": "鸡蛋（红皮）", "phe": 617.0}, {"name": "鸡蛋（土鸡）", "phe": 663.0}, {"name": "鸡蛋白", "phe": 640.0}, {"name": "鸡蛋黄", "phe": 588.0}, {"name": "鸡蛋黄（乌骨鸡）", "phe": 616.0}, {"name": "鸡蛋粉［全蛋粉］", "phe": 2030.0}, {"name": "鸡蛋黄粉", "phe": 1333.0}, {"name": "松花蛋（鸡蛋）", "phe": 822.0}, {"name": "鸭蛋", "phe": 711.0}, {"name": "松花蛋（鸭蛋）［皮蛋］", "phe": 792.0}, {"name": "咸鸭蛋", "phe": 725.0}, {"name": "鹅蛋", "phe": 671.0}, {"name": "鹅蛋白", "phe": 750.0}, {"name": "鹅蛋黄", "phe": 730.0}, {"name": "鹌鹑蛋", "phe": 583.0}, {"name": "鹌鹑蛋（五香罐头）", "phe": 460.0}, {"name": "白条鱼（裸鱼）", "phe": 758.0}, {"name": "草鱼［白鲩，草包鱼］", "phe": 667.0}, {"name": "赤眼鳟［金目鱼］", "phe": 483.0}, {"name": "鳡鱼［猴鱼］", "phe": 664.0}, {"name": "胡子鲇［塘虱（鱼）］", "phe": 631.0}, {"name": "黄鳝［鳝鱼］", "phe": 803.0}, {"name": "黄鳝丝", "phe": 930.0}, {"name": "鲤鱼［鲤拐子］", "phe": 651.0}, {"name": "罗非鱼（莫桑比克）［非洲黑鲫鱼］", "phe": 659.0}, {"name": "泥鳅", "phe": 613.0}, {"name": "青鱼［青皮鱼，青鳞鱼，青混］", "phe": 806.0}, {"name": "乌鳢［黑鱼，石斑鱼，生鱼］", "phe": 718.0}, {"name": "湟鱼（裸鲤鱼）", "phe": 710.0}, {"name": "湟鱼（裸鱼）", "phe": 841.0}, {"name": "鲇鱼［胡子鲇，鲢胡，旺虾］", "phe": 742.0}, {"name": "鲢鱼［白鲢，胖子，连子鱼］", "phe": 696.0}, {"name": "鲫鱼［喜头鱼，海附鱼］", "phe": 704.0}, {"name": "鲮鱼［雪鲮］", "phe": 777.0}, {"name": "鳊鱼［鲂鱼，武昌鱼］", "phe": 802.0}, {"name": "鳙鱼［胖头鱼，摆佳鱼，花鲢鱼］", "phe": 586.0}, {"name": "鳜鱼［桂鱼，花鲫鱼］", "phe": 897.0}, {"name": "鳟鱼［虹鳟］", "phe": 957.0}, {"name": "带鱼［白带鱼，刀鱼］", "phe": 685.0}, {"name": "堤鱼", "phe": 561.0}, {"name": "丁香鱼（干）", "phe": 1529.0}, {"name": "狗母鱼［大头狗母鱼］", "phe": 568.0}, {"name": "海鳗［鲫勾］", "phe": 776.0}, {"name": "红娘鱼［翼红娘鱼］", "phe": 705.0}, {"name": "黄鱼（大黄花鱼）", "phe": 671.0}, {"name": "黄鱼（小黄花鱼）", "phe": 679.0}, {"name": "黄鲂［赤虹，老板鱼］", "phe": 540.0}, {"name": "绿鳍马面豚［面包鱼，橡皮鱼］", "phe": 834.0}, {"name": "梅童鱼［大头仔鱼，丁珠鱼］", "phe": 608.0}, {"name": "蛇鲻［沙梭鱼］", "phe": 785.0}, {"name": "舌鳎［花纹舌头，舌头鱼］", "phe": 628.0}, {"name": "油抒［香梭鱼］", "phe": 561.0}, {"name": "颚针鱼［针量鱼］", "phe": 710.0}, {"name": "鲅鱼［马鲛鱼，燕鲅鱼，巴鱼］", "phe": 776.0}, {"name": "鲅鱼（咸）［咸马胶］", "phe": 1020.0}, {"name": "鲆［片口鱼，比目鱼］", "phe": 801.0}, {"name": "鲈鱼［鲈花］", "phe": 767.0}, {"name": "鲐鱼［青鲐鱼，鲐巴鱼，青砖鱼］", "phe": 808.0}, {"name": "鲚鱼（小）［小凤尾鱼］", "phe": 587.0}, {"name": "鲨鱼［真鲨，白斑角鲨］", "phe": 872.0}, {"name": "鲳鱼［平鱼，银鲳，刺鲳］", "phe": 644.0}, {"name": "4鲷［黑鲷，铜盆鱼，大目鱼］", "phe": 658.0}, {"name": "鲽［比目鱼，凸眼鱼］", "phe": 812.0}, {"name": "鳓鱼［快鱼，力鱼］", "phe": 805.0}, {"name": "鳕鱼［鳕狭，明太鱼］", "phe": 741.0}, {"name": "晚鱼［鳘鱼］", "phe": 838.0}, {"name": "鱼片干", "phe": 1885.0}, {"name": "东方对虾［中国对虾］", "phe": 679.0}, {"name": "对虾", "phe": 690.0}, {"name": "海虾", "phe": 685.0}, {"name": "河虾", "phe": 683.0}, {"name": "基围虾", "phe": 764.0}, {"name": "江虾［沼虾］", "phe": 626.0}, {"name": "龙虾", "phe": 837.0}, {"name": "螯虾", "phe": 549.0}, {"name": "虾米［海米，虾仁］", "phe": 2006.0}, {"name": "海蟹", "phe": 444.0}, {"name": "河蟹", "phe": 563.0}, {"name": "踞缘青蟹［青蟹］", "phe": 469.0}, {"name": "梭子蟹", "phe": 511.0}, {"name": "蛏子", "phe": 287.0}, {"name": "蛏干［蛏子缢，蛏青子］", "phe": 1911.0}, {"name": "赤贝", "phe": null}, {"name": "河蚌", "phe": 352.0}, {"name": "河蚬［蚬子］", "phe": 226.0}, {"name": "牡蛎［海蛎子］", "phe": 203.0}, {"name": "生蚝", "phe": 369.0}, {"name": "扇贝（鲜）", "phe": 454.0}, {"name": "扇贝（干）［干贝］", "phe": 1788.0}, {"name": "银蚶［蚶子］", "phe": null}, {"name": "贻贝（鲜）［淡菜，壳菜］", "phe": 384.0}, {"name": "贻贝（干）［淡菜，壳菜］", "phe": 2071.0}, {"name": "蛤蜊（X）", "phe": 326.0}, {"name": "花蛤蜊", "phe": 248.0}, {"name": "黄螺［东风螺］", "phe": 745.0}, {"name": "螺蛳", "phe": 297.0}, {"name": "田螺", "phe": 390.0}, {"name": "香海螺", "phe": 840.0}, {"name": "海参（水浸）", "phe": 162.0}, {"name": "海蜇皮", "phe": 69.0}, {"name": "海蜇头", "phe": 114.0}, {"name": "墨鱼［曼氏无针乌贼］", "phe": 536.0}, {"name": "墨鱼（干）［曼氏无针乌贼］", "phe": 1865.0}, {"name": "鱿鱼（水浸）", "phe": 626.0}, {"name": "豆奶粉", "phe": 612.0}, {"name": "健儿粉", "phe": 336.0}, {"name": "乳儿糕", "phe": 474.0}, {"name": "婴儿营养粉［婴宝＊5410＊］", "phe": 641.0}, {"name": "艾窝窝", "phe": 173.0}, {"name": "白水羊头", "phe": 820.0}, {"name": "炒肝", "phe": 127.0}, {"name": "豆腐脑（带卤）", "phe": 82.0}, {"name": "栗羊羹", "phe": 212.0}, {"name": "凉面", "phe": 262.0}, {"name": "驴打滚", "phe": 379.0}, {"name": "蜜三刀", "phe": 224.0}, {"name": "年糕", "phe": 159.0}, {"name": "酿皮", "phe": 125.0}, {"name": "甜醅", "phe": 268.0}, {"name": "豌豆黄", "phe": 447.0}, {"name": "油茶", "phe": 108.0}, {"name": "油炸豆瓣", "phe": 1188.0}, {"name": "蛋清蛋糕", "phe": 276.0}, {"name": "宫廷蛋糕", "phe": 401.0}, {"name": "奶油蛋糕", "phe": 322.0}, {"name": "西式蛋糕", "phe": 436.0}, {"name": "月饼（百寿宴点）", "phe": 196.0}, {"name": "月饼（唐王赏月）", "phe": 308.0}, {"name": "月饼（香油果馅）", "phe": 242.0}, {"name": "鹅油卷", "phe": 345.0}, {"name": "核桃薄脆", "phe": 288.0}, {"name": "黑洋酥", "phe": 272.0}, {"name": "混糖糕点", "phe": 327.0}, {"name": "夹心酥饼", "phe": 261.0}, {"name": "江米条", "phe": 214.0}, {"name": "京式黄酥", "phe": 207.0}, {"name": "廖花糖", "phe": 282.0}, {"name": "芝麻桃酥", "phe": 332.0}, {"name": "茯苓夹饼", "phe": 180.0}, {"name": "蛋片", "phe": 459.0}, {"name": "燕麦片", "phe": 772.0}, {"name": "方便面", "phe": 436.0}, {"name": "黄油面包", "phe": 331.0}, {"name": "麦维面包", "phe": 348.0}, {"name": "桦榕面包", "phe": 396.0}, {"name": "饼干（X）", "phe": 285.0}, {"name": "VC饼干", "phe": 341.0}, {"name": "饼干（强化锌）［富锌饼干］", "phe": 348.0}, {"name": "钙王饼干", "phe": 436.0}, {"name": "高蛋白饼干", "phe": 348.0}, {"name": "牛奶饼干", "phe": 401.0}, {"name": "原汁沙棘", "phe": 67.0}, {"name": "茶砖［砖茶］", "phe": 714.0}, {"name": "茶砖（小）", "phe": 699.0}, {"name": "红茶", "phe": 988.0}, {"name": "花茶", "phe": 1003.0}, {"name": "柿叶茶", "phe": 954.0}, {"name": "珠茶", "phe": 1062.0}, {"name": "冰激凌粉", "phe": 648.0}, {"name": "固体橘子饮料", "phe": 4.0}, {"name": "可可粉", "phe": 708.0}, {"name": "鲜橘晶", "phe": 2.0}, {"name": "冰激凌", "phe": 97.0}, {"name": "大雪糕", "phe": 56.0}, {"name": "双棒雪糕", "phe": 92.0}, {"name": "娃娃头", "phe": 189.0}, {"name": "紫雪糕", "phe": 107.0}, {"name": "啤酒（X）", "phe": 7.0}, {"name": "北京特制啤酒（6度）", "phe": 11.0}, {"name": "清爽型啤酒（6度）", "phe": 7.0}, {"name": "特制啤酒（5度）", "phe": 6.0}, {"name": "黄酒（X）", "phe": 59.0}, {"name": "加饭黄酒", "phe": 58.0}, {"name": "善酿酒", "phe": 77.0}, {"name": "元红黄酒", "phe": 46.0}, {"name": "花生牛轧糖", "phe": 144.0}, {"name": "巧克力", "phe": 155.0}, {"name": "酱油（X）", "phe": 331.0}, {"name": "酱油（高级）", "phe": 291.0}, {"name": "酱油（一级）", "phe": 287.0}, {"name": "酱油（冬菇）", "phe": 207.0}, {"name": "酱油（多味）", "phe": 308.0}, {"name": "酱油（三鲜）", "phe": 201.0}, {"name": "酱油（特母）", "phe": 232.0}, {"name": "醋（X）", "phe": 82.0}, {"name": "陈醋", "phe": 218.0}, {"name": "五香醋", "phe": 39.0}, {"name": "豆瓣酱", "phe": 499.0}, {"name": "豆瓣酱（辣油）", "phe": 334.0}, {"name": "豆瓣辣酱", "phe": 161.0}, {"name": "黄酱［大酱］", "phe": null}, {"name": "酱油膏", "phe": null}, {"name": "辣椒酱［辣椒糊］", "phe": 45.0}, {"name": "甜面酱", "phe": 233.0}, {"name": "香油辣酱", "phe": 95.0}, {"name": "芝麻酱", "phe": 965.0}, {"name": "腐乳（臭）［臭豆腐］", "phe": 528.0}, {"name": "腐乳（红）［酱豆腐］", "phe": 667.0}, {"name": "酱大头菜", "phe": 44.0}, {"name": "酱甘露［地蚕，甘露子］", "phe": 83.0}, {"name": "酱黄瓜", "phe": 106.0}, {"name": "萝卜干", "phe": 75.0}, {"name": "榨菜", "phe": 35.0}, {"name": "腌雪里红", "phe": 97.0}, {"name": "花椒", "phe": 161.0}, {"name": "黄毛籽", "phe": 1075.0}, {"name": "芥茉", "phe": 844.0}, {"name": "辣椒粉", "phe": 705.0}, {"name": "茴香籽［小茴香籽］", "phe": 599.0}];
+    (function() {
+      var data = window.FOOD_PHE_DATA;
+      var qEl = document.getElementById("q");
+      var gramEl = document.getElementById("gram");
+      var btn = document.getElementById("btn");
+      var out = document.getElementById("out");
+      // 常见别名：用户输入 -> 数据中可能出现的词（用于扩展匹配，双向都会查）
+      var ALIAS = { "牛奶": "牛乳", "鲜奶": "牛乳", "番茄": "西红柿", "西红柿": "番茄", "土豆": "马铃薯", "洋芋": "马铃薯", "马铃薯": "土豆", "红薯": "甘薯", "山芋": "甘薯", "红萝卜": "胡萝卜", "莲藕": "藕", "蒜头": "大蒜", "葱头": "洋葱", "凤梨": "菠萝", "桂鱼": "鳜鱼", "刀鱼": "带鱼", "豆乳": "豆奶", "卷心菜": "甘蓝", "圆白菜": "甘蓝", "空心菜": "蕹菜", "香菜": "芫荽", "旱芹": "芹菜", "花椰菜": "菜花", "板栗": "栗子", "落花生": "花生" };
+      function getSearchKeywords(kw) {
+        var list = [kw];
+        if (ALIAS[kw]) list.push(ALIAS[kw]);
+        for (var a in ALIAS) if (ALIAS[a] === kw) list.push(a);
+        return list;
+      }
+      function matchFood(food, keywords) {
+        if (!food.name) return false;
+        var n = food.name.toLowerCase();
+        for (var i = 0; i < keywords.length; i++) if (n.indexOf(keywords[i].toLowerCase()) >= 0) return true;
+        return false;
+      }
+      function parseGrams(val) {
+        if (val == null || (typeof val === "string" && val.trim() === "")) return 0;
+        var n = parseFloat(String(val).replace(/,/g, "").trim(), 10);
+        return (isNaN(n) || n < 0) ? 0 : n;
+      }
+      function showOne(food, grams) {
+        var phe100 = food.phe;
+        var per100Str = phe100 != null ? phe100 + " mg" : "暂无数据";
+        var gramNum = parseGrams(grams);
+        var html = '<div class="result"><div class="name">' + escapeHtml(food.name) + '</div>';
+        if (gramNum > 0 && phe100 != null) {
+          var forGram = Math.round((phe100 / 100) * gramNum * 10) / 10;
+          html += '<div class="phe">' + escapeHtml(gramNum + ' 克 苯丙氨酸：' + forGram + ' mg') + '</div>';
+          html += '<div class="phe-per-100">每 100g 可食部分：' + escapeHtml(per100Str) + '</div>';
+        } else {
+          html += '<div class="phe">' + escapeHtml(per100Str) + '</div>';
+          html += '<div class="unit">每 100g 可食部分</div>';
+        }
+        html += '</div>';
+        out.innerHTML = html;
+      }
+      function showNoResult(kw, grams) {
+        var gramNum = parseGrams(grams);
+        var html = '<div class="result no-data">未找到「' + escapeHtml(kw) + '」相关食物。可试试别名（如土豆、西红柿、牛奶），或使用 AI 估算（需部署并配置 API Key）。<br><button type="button" class="ai-estimate-btn" id="aiBtn">用 AI 估算</button></div>';
+        out.innerHTML = html;
+        var aiBtn = document.getElementById("aiBtn");
+        if (aiBtn) aiBtn.addEventListener("click", function() { requestAIEstimate(kw, gramNum); });
+      }
+      function showAIResult(foodName, grams, data) {
+        var phe100 = data.phePer100;
+        var note = data.note || "";
+        var gramNum = parseGrams(grams);
+        var html = '<div class="result"><div class="name">' + escapeHtml(foodName) + ' <span style="font-size:0.8rem;color:var(--text-muted);">(AI 估算)</span></div>';
+        if (phe100 != null) {
+          var per100Str = phe100 + " mg";
+          if (gramNum > 0) {
+            var forGram = Math.round((phe100 / 100) * gramNum * 10) / 10;
+            html += '<div class="phe">' + escapeHtml(gramNum + ' 克 苯丙氨酸：' + forGram + ' mg') + '</div>';
+            html += '<div class="phe-per-100">每 100g 可食部分：' + per100Str + '</div>';
+          } else {
+            html += '<div class="phe">' + per100Str + '</div>';
+            html += '<div class="unit">每 100g 可食部分</div>';
+          }
+        } else {
+          html += '<div class="phe">暂无估算值</div>';
+        }
+        if (note) html += '<div class="ai-note">' + escapeHtml(note) + '</div>';
+        html += '<div class="ai-note">AI 估算，仅供参考，不作为医疗依据。</div></div>';
+        out.innerHTML = html;
+      }
+      function requestAIEstimate(food, grams) {
+        var aiBtn = document.querySelector(".ai-estimate-btn");
+        if (aiBtn) { aiBtn.disabled = true; aiBtn.textContent = "估算中…"; }
+        var apiUrl = "/.netlify/functions/phe-estimate";
+        fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ food: food, grams: grams || 0 }),
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.error) {
+              out.innerHTML = '<div class="result no-data">AI 估算失败：' + escapeHtml(data.error) + (data.source === "config" ? '。请在 Netlify 后台设置环境变量 OPENAI_API_KEY。' : '') + '</div>';
+            } else {
+              showAIResult(food, grams, data);
+            }
+          })
+          .catch(function(err) {
+            out.innerHTML = '<div class="result no-data">请求失败：' + escapeHtml(err.message) + '。若为本地打开或未部署到 Netlify，AI 估算不可用。</div>';
+          })
+          .finally(function() {
+            if (aiBtn) { aiBtn.disabled = false; aiBtn.textContent = "用 AI 估算"; }
+          });
+      }
+      function showList(list, grams) {
+        if (list.length === 0) {
+          showNoResult(qEl.value.trim(), grams);
+          return;
+        }
+        var gramNum = parseGrams(grams);
+        var showForGram = gramNum > 0;
+        var title = showForGram
+          ? ('找到 ' + list.length + ' 个结果（已按您输入的 ' + gramNum + ' 克计算）')
+          : ('找到 ' + list.length + ' 个结果（每 100g 含量）');
+        var html = '<div class="result"><div class="list-title">' + title + '</div><div class="list">';
+        for (var i = 0; i < list.length; i++) {
+          var f = list[i];
+          var phe100 = f.phe;
+          var pheStr = phe100 != null ? phe100 + " mg" : "暂无数据";
+          var forGramLine = "";
+          if (showForGram && phe100 != null) {
+            var forGram = Math.round((phe100 / 100) * gramNum * 10) / 10;
+            forGramLine = '<div class="list-item-gram">' + gramNum + ' 克 ≈ ' + forGram + ' mg</div>';
+          }
+          html += '<div class="list-item"><div class="list-item-left"><span class="list-item-name">' + escapeHtml(f.name) + '</span>' + forGramLine + '</div><span class="phe">' + escapeHtml(pheStr) + '</span></div>';
+        }
+        html += '</div></div>';
+        out.innerHTML = html;
+      }
+      function escapeHtml(s) {
+        var d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+      function search() {
+        var kw = qEl.value.trim().replace(/\s+/g, " ");
+        if (!kw) {
+          out.innerHTML = '<div class="result no-data">请输入食物名称再查询。</div>';
+          return;
+        }
+        var keywords = getSearchKeywords(kw);
+        var list = data.filter(function(f) { return matchFood(f, keywords); });
+        var grams = gramEl ? parseGrams(gramEl.value) : 0;
+        if (list.length === 1) showOne(list[0], grams);
+        else showList(list.slice(0, 50), grams);
+      }
+      btn.addEventListener("click", search);
+      qEl.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") { e.preventDefault(); if (gramEl) gramEl.focus(); else search(); }
+      });
+      if (gramEl) gramEl.addEventListener("keydown", function(e) { if (e.key === "Enter") { e.preventDefault(); search(); } });
+    })();
+  </script>
+</body>
+</html>
